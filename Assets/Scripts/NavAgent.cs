@@ -10,6 +10,7 @@ public class NavAgent : MonoBehaviour
     private NavMeshAgent agent;
     private Transform player;
     private Light spotLight;
+    private GameStatus gameStatus;
 
     public Transform pathHolder;
     public float viewDistance = 50;
@@ -23,6 +24,7 @@ public class NavAgent : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
         agent = GetComponent<NavMeshAgent>();
         spotLight = GetComponentInChildren<Light>();
+        gameStatus = GameObject.FindObjectOfType<GameStatus>();
 
         obstacleMask = LayerMask.GetMask("Obstacle");
 
@@ -44,10 +46,12 @@ public class NavAgent : MonoBehaviour
             if (CanSeePlayer())
             {
                 spotLight.color = Color.red;
-            }
-            else
-            {
-                spotLight.color = Color.green;
+                gameStatus.SetStatus(Status.lose);
+                Debug.Log("Game Lost");
+
+                // Stop agent and exit patrol function
+                agent.isStopped = true;
+                break;
             }
 
             // Check if we've reached the destination
@@ -72,7 +76,6 @@ public class NavAgent : MonoBehaviour
     {
         // Get View distance from visibility level
         //float viewDistance = visibilityLevelToViewDistanceMap[playerStats.GetVisibility()];
-        float viewDistance = 15;
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Within View Distance
